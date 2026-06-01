@@ -7,6 +7,21 @@
  * @see http://sites.google.com/site/murmurhash/
  */
 
+/**
+ * Computes a fast, non-cryptographic 32-bit hash of a string using MurmurHash3.
+ *
+ * This is used by the feature flag system to deterministically assign users to
+ * percentage-based rollout buckets. Given the same input string (e.g. `"FLAG_NAME-userId"`),
+ * it always returns the same unsigned 32-bit integer, ensuring a user's bucket
+ * assignment is stable across requests.
+ *
+ * The algorithm processes the input in 4-byte chunks for speed, then handles
+ * any remaining bytes individually. A finalisation ("avalanche") step mixes
+ * the bits to improve distribution uniformity.
+ *
+ * @param key - The string to hash (typically `"<featureName>-<userId>"`).
+ * @returns An unsigned 32-bit integer in the range [0, 4294967295].
+ */
 export function murmurhash(key: string) {
   const remainder = key.length & 3
   const bytes = key.length - remainder
